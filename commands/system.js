@@ -289,3 +289,66 @@ cmd({
 
     }
 )
+const { addUserToGroup, checkPaymentConfirmation, getUserInfo } = require('../lib') // Assuming these functions are defined in lib
+
+//---------------------------------------------------------------------------
+cmd({
+    pattern: "fxpaid",
+    category: "owner",
+    filename: __filename,
+    desc: "Add user to VIP forex trading group upon payment confirmation."
+},
+async (Void, citel, text, { isCreator }) => {
+    if (!isCreator) return citel.reply("This command is only for the bot owner.")
+    
+    const phoneNumber = text.trim(); // Extract the phone number from the command
+    
+    // Check if the payment is confirmed
+    const isPaymentConfirmed = await checkPaymentConfirmation(phoneNumber);
+    
+    if (isPaymentConfirmed) {
+        // Fetch user information from the payment
+        const userInfo = await getUserInfo(phoneNumber);
+        
+        if (userInfo) {
+            // Add the user to the group
+            const groupLink = 'https://chat.whatsapp.com/HQWXOJU9s6oDHloPsTEKfY';
+            const addedToGroup = await addUserToGroup(userInfo, groupLink);
+            
+            if (addedToGroup) {
+                return citel.reply(`User ${userInfo.name} (${userInfo.phoneNumber}) has been added to the group.`);
+            } else {
+                return citel.reply("Failed to add the user to the group. Please try again later.");
+            }
+        } else {
+            return citel.reply("User information not found. Please make sure the phone number is correct.");
+        }
+    } else {
+        return citel.reply("Payment for this user has not been confirmed yet.");
+    }
+)
+//---------------------------------------------------------------------------
+
+// Dummy functions for demonstration
+async function checkPaymentConfirmation(phoneNumber) {
+    // Implement your logic to check payment confirmation here
+    // For demonstration, let's assume all payments are confirmed
+    return true;
+}
+
+async function getUserInfo(phoneNumber) {
+    // Implement your logic to fetch user information here
+    // For demonstration, let's return a dummy user
+    return {
+        name: "John Doe",
+        phoneNumber: phoneNumber
+    };
+}
+
+async function addUserToGroup(userInfo, groupLink) {
+    // Implement your logic to add user to the group here
+    // For demonstration, let's assume the user is successfully added
+    console.log(`Adding user ${userInfo.name} to group: ${groupLink}`);
+    return true;
+}
+
